@@ -23,3 +23,6 @@ venv/
 Thumbs.db
 # Local ML artifacts
 artifacts/
+# MLflow local database
+mlflow.db# MLflow local database
+mlflow.db
