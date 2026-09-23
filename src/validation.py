@@ -68,12 +68,16 @@ def validate_data_quality(df):
         "seller_state",
     ]
 
-    # Kontrollera varje obligatoriskt fält.
+    # Kontrollera missing ratio för varje obligatoriskt fält.
+# För dessa kolumner är den tillåtna missing-ration 0 %.
     for column in required_non_null_columns:
-        if df[column].isna().any():
-            raise ValueError(
-                f"Data validation failed: {column} cannot contain missing values."
-            )
+        missing_ratio = df[column].isna().mean()
+
+        if missing_ratio > 0:
+           raise ValueError(
+              f"Data validation failed: {column} has a missing ratio "
+              f"of {missing_ratio:.2%}. Allowed missing ratio is 0%."
+        )
 
     # Numeriska saknade värden stoppas inte här.
     # Den sparade preprocessorn från träningen innehåller en imputer
