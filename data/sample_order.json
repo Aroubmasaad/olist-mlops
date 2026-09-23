@@ -1,0 +1,16 @@
+[
+  {
+    "order_purchase_timestamp": "2018-01-15 10:30:00",
+    "order_estimated_delivery_date": "2018-01-25 10:30:00",
+    "total_items": 1,
+    "total_price": 100.0,
+    "total_freight": 20.0,
+    "total_payment_value": 120.0,
+    "number_of_payments": 1,
+    "max_installments": 1,
+    "seller_count": 1,
+    "distance_km": 100.0,
+    "customer_state": "SP",
+    "seller_state": "SP"
+  }
+]

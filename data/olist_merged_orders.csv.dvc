@@ -1,0 +1,5 @@
+outs:
+- md5: 1dbc24b770abbe88976bb4309907d25f
+  size: 19577186
+  hash: md5
+  path: olist_merged_orders.csv
