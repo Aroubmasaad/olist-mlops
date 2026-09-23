@@ -9,3 +9,7 @@ paths:
 
 inference:
   threshold: 0.5
+
+mlflow:
+  model_name: "olist-late-delivery-model"
+  model_version: "1"
