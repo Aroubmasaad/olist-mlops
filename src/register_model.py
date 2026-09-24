@@ -59,7 +59,6 @@ mlflow.set_experiment("olist-late-delivery")
 # Ett Run innehåller information om en specifik modell:
 # parameters, metrics och artifacts.
 with mlflow.start_run(run_name="selected-logistic-regression"):
-
     # -----------------------------------------------------
     # Logga modellens parametrar
     # -----------------------------------------------------

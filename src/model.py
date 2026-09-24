@@ -1,5 +1,5 @@
+import os
 import mlflow
-
 from src.config import load_config
 
 
@@ -13,6 +13,11 @@ def load_model():
 
     # Läs projektets konfiguration från config.yaml.
     config = load_config()
+
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+
+    if tracking_uri:
+        mlflow.set_tracking_uri(tracking_uri)
 
     # Hämta modellnamn och modellversion från MLflow-konfigurationen.
     model_name = config["mlflow"]["model_name"]

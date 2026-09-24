@@ -8,9 +8,33 @@ from src.features import RAW_FEATURES
 # Dessa används för att kontrollera customer_state och seller_state
 # innan datan skickas vidare till modellen.
 ALLOWED_STATES = [
-    "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO",
-    "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR",
-    "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO",
+    "AC",
+    "AL",
+    "AM",
+    "AP",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MG",
+    "MS",
+    "MT",
+    "PA",
+    "PB",
+    "PE",
+    "PI",
+    "PR",
+    "RJ",
+    "RN",
+    "RO",
+    "RR",
+    "RS",
+    "SC",
+    "SE",
+    "SP",
+    "TO",
 ]
 
 
@@ -24,17 +48,12 @@ def validate_input(df):
     """
 
     # Hitta obligatoriska kolumner som saknas i inkommande data.
-    missing_columns = [
-        column for column in RAW_FEATURES
-        if column not in df.columns
-    ]
+    missing_columns = [column for column in RAW_FEATURES if column not in df.columns]
 
     # Om minst en obligatorisk kolumn saknas ska datan inte
     # skickas vidare till feature engineering eller modellen.
     if missing_columns:
-        raise ValueError(
-            f"Missing required columns: {missing_columns}"
-        )
+        raise ValueError(f"Missing required columns: {missing_columns}")
 
     # Om alla obligatoriska kolumner finns returneras datan.
     return df
@@ -69,20 +88,19 @@ def validate_data_quality(df):
     ]
 
     # Kontrollera missing ratio för varje obligatoriskt fält.
-# För dessa kolumner är den tillåtna missing-ration 0 %.
+    # För dessa kolumner är den tillåtna missing-ration 0 %.
     for column in required_non_null_columns:
         missing_ratio = df[column].isna().mean()
 
         if missing_ratio > 0:
-           raise ValueError(
-              f"Data validation failed: {column} has a missing ratio "
-              f"of {missing_ratio:.2%}. Allowed missing ratio is 0%."
-        )
+            raise ValueError(
+                f"Data validation failed: {column} has a missing ratio "
+                f"of {missing_ratio:.2%}. Allowed missing ratio is 0%."
+            )
 
     # Numeriska saknade värden stoppas inte här.
     # Den sparade preprocessorn från träningen innehåller en imputer
     # som hanterar numeriska saknade värden på samma sätt som i Task 2.
-
 
     # ---------------------------------------------------------
     # 2. KONTROLL AV NUMERISKA DATATYPER
@@ -101,7 +119,6 @@ def validate_data_quality(df):
     ]
 
     for column in numeric_columns:
-
         # Saknade numeriska värden tas bort endast under denna kontroll,
         # eftersom de senare kan hanteras av den sparade imputern.
         non_null_values = df[column].dropna()
@@ -120,7 +137,6 @@ def validate_data_quality(df):
                 f"Data validation failed: {column} must contain numeric values."
             )
 
-
     # ---------------------------------------------------------
     # 3. SKAPA EN GREAT EXPECTATIONS-BATCH
     # ---------------------------------------------------------
@@ -131,14 +147,10 @@ def validate_data_quality(df):
     context = gx.get_context(mode="ephemeral")
 
     # Skapa en pandas-datakälla för inkommande DataFrame.
-    data_source = context.data_sources.add_pandas(
-        name="inference_source"
-    )
+    data_source = context.data_sources.add_pandas(name="inference_source")
 
     # Registrera inkommande orderdata som en data asset.
-    data_asset = data_source.add_dataframe_asset(
-        name="inference_orders"
-    )
+    data_asset = data_source.add_dataframe_asset(name="inference_orders")
 
     # Definiera att hela inkommande DataFrame ska valideras.
     batch_definition = data_asset.add_batch_definition_whole_dataframe(
@@ -146,10 +158,7 @@ def validate_data_quality(df):
     )
 
     # Skapa den batch som Great Expectations ska kontrollera.
-    batch = batch_definition.get_batch(
-        batch_parameters={"dataframe": df}
-    )
-
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     # ---------------------------------------------------------
     # 4. KONTROLL AV NUMERISKA INTERVALL
@@ -162,9 +171,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(total_items_expectation).success:
-        raise ValueError(
-            "Data validation failed: total_items must be at least 1."
-        )
+        raise ValueError("Data validation failed: total_items must be at least 1.")
 
     # Orderpriset får inte vara negativt.
     price_expectation = gx.expectations.ExpectColumnValuesToBeBetween(
@@ -173,9 +180,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(price_expectation).success:
-        raise ValueError(
-            "Data validation failed: total_price cannot be negative."
-        )
+        raise ValueError("Data validation failed: total_price cannot be negative.")
 
     # Fraktkostnaden får inte vara negativ.
     freight_expectation = gx.expectations.ExpectColumnValuesToBeBetween(
@@ -184,9 +189,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(freight_expectation).success:
-        raise ValueError(
-            "Data validation failed: total_freight cannot be negative."
-        )
+        raise ValueError("Data validation failed: total_freight cannot be negative.")
 
     # Det totala betalningsvärdet får inte vara negativt.
     payment_expectation = gx.expectations.ExpectColumnValuesToBeBetween(
@@ -217,9 +220,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(installments_expectation).success:
-        raise ValueError(
-            "Data validation failed: max_installments must be at least 1."
-        )
+        raise ValueError("Data validation failed: max_installments must be at least 1.")
 
     # En order måste ha minst en säljare.
     seller_count_expectation = gx.expectations.ExpectColumnValuesToBeBetween(
@@ -228,9 +229,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(seller_count_expectation).success:
-        raise ValueError(
-            "Data validation failed: seller_count must be at least 1."
-        )
+        raise ValueError("Data validation failed: seller_count must be at least 1.")
 
     # Avståndet mellan kund och säljare får inte vara negativt.
     distance_expectation = gx.expectations.ExpectColumnValuesToBeBetween(
@@ -239,10 +238,7 @@ def validate_data_quality(df):
     )
 
     if not batch.validate(distance_expectation).success:
-        raise ValueError(
-            "Data validation failed: distance_km cannot be negative."
-        )
-
+        raise ValueError("Data validation failed: distance_km cannot be negative.")
 
     # ---------------------------------------------------------
     # 5. KONTROLL AV TILLÅTNA DELSTATSKODER
@@ -269,7 +265,6 @@ def validate_data_quality(df):
         raise ValueError(
             "Data validation failed: seller_state is not an allowed state code."
         )
-
 
     # ---------------------------------------------------------
     # 6. KONTROLL AV DATUM
@@ -309,8 +304,9 @@ def validate_data_quality(df):
     # preprocessing och slutligen ML-modellen.
     return df
 
-#Jag validerar inkommande data innan den skickas till ML-modellen. 
-#Först kontrollerar jag att alla obligatoriska kolumner finns. 
-#Sedan kontrollerar jag saknade värden, numeriska datatyper, rimliga intervall, tillåtna kategorier och datum.
-#Jag använder Great Expectations för datakvalitetsreglerna. Syftet är att felaktig data ska stoppas innan feature engineering, preprocessing och prediktion. 
-#Numeriska saknade värden kan hanteras av den redan tränade och sparade imputern, så jag tränar inte om preprocessorn under inference.
+
+# Jag validerar inkommande data innan den skickas till ML-modellen.
+# Först kontrollerar jag att alla obligatoriska kolumner finns.
+# Sedan kontrollerar jag saknade värden, numeriska datatyper, rimliga intervall, tillåtna kategorier och datum.
+# Jag använder Great Expectations för datakvalitetsreglerna. Syftet är att felaktig data ska stoppas innan feature engineering, preprocessing och prediktion.
+# Numeriska saknade värden kan hanteras av den redan tränade och sparade imputern, så jag tränar inte om preprocessorn under inference.

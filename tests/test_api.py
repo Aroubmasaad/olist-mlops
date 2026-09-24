@@ -8,9 +8,10 @@ client = TestClient(app)
 
 def test_health_endpoint():
     response = client.get("/health")
-    
 
     assert response.status_code == 200
+
+
 def test_predict_endpoint():
     order = {
         "order_purchase_timestamp": "2018-01-15T10:30:00",
@@ -36,7 +37,8 @@ def test_predict_endpoint():
     assert "prediction" in result
     assert "probability" in result
     assert "model_version" in result
-    
+
+
 def test_predict_rejects_invalid_input():
     invalid_order = {
         "order_purchase_timestamp": "2018-01-15T10:30:00",
@@ -56,7 +58,8 @@ def test_predict_rejects_invalid_input():
     response = client.post("/predict", json=invalid_order)
 
     assert response.status_code == 422
-    
+
+
 def test_batch_predict_endpoint():
     order = {
         "order_purchase_timestamp": "2018-01-15T10:30:00",

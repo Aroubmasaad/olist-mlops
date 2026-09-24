@@ -3,9 +3,10 @@ project:
   model_version: "1.0.0"
 
 paths:
-  model: "artifacts/late_delivery_model.joblib"
-  preprocessor: "artifacts/preprocessor.joblib"
-  feature_list: "artifacts/feature_list.json"
+  paths:
+  model: "models/late_delivery_model.joblib"
+  preprocessor: "models/preprocessor.joblib"
+  feature_list: "models/feature_list.json"
 
 inference:
   threshold: 0.5

@@ -18,11 +18,13 @@ class OrderInput(BaseModel):
 
     customer_state: str
     seller_state: str
-    
+
+
 class PredictionResponse(BaseModel):
     prediction: int
     probability: float
     model_version: str
+
 
 class BatchOrderInput(BaseModel):
     orders: list[OrderInput]

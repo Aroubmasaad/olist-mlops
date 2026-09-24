@@ -1,4 +1,5 @@
 import pandas as pd
+
 RAW_FEATURES = [
     "order_purchase_timestamp",
     "order_estimated_delivery_date",
@@ -35,27 +36,24 @@ CATEGORICAL_FEATURES = [
 ]
 
 FEATURE_COLUMNS = NUMERIC_FEATURES + CATEGORICAL_FEATURES
+
+
 def create_features(df):
     df = df.copy()
-        # Konvertera datum som behövs för feature engineering
-    df["order_purchase_timestamp"] = pd.to_datetime(
-        df["order_purchase_timestamp"]
-    )
+    # Konvertera datum som behövs för feature engineering
+    df["order_purchase_timestamp"] = pd.to_datetime(df["order_purchase_timestamp"])
     df["order_estimated_delivery_date"] = pd.to_datetime(
         df["order_estimated_delivery_date"]
     )
-        # Tidsfeatures från ordertillfället
+    # Tidsfeatures från ordertillfället
     df["purchase_month"] = df["order_purchase_timestamp"].dt.month
     df["purchase_weekday"] = df["order_purchase_timestamp"].dt.weekday
     df["purchase_hour"] = df["order_purchase_timestamp"].dt.hour
-        # Planerad leveranstid, känd vid ordertillfället
+    # Planerad leveranstid, känd vid ordertillfället
     df["estimated_delivery_days"] = (
-        df["order_estimated_delivery_date"]
-        - df["order_purchase_timestamp"]
+        df["order_estimated_delivery_date"] - df["order_purchase_timestamp"]
     ).dt.total_seconds() / 86400
-        # Geografisk feature
-    df["same_state"] = (
-        df["customer_state"] == df["seller_state"]
-    ).astype(int)
+    # Geografisk feature
+    df["same_state"] = (df["customer_state"] == df["seller_state"]).astype(int)
 
     return df

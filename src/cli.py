@@ -8,9 +8,7 @@ from src.logger import logger
 
 def main(input_path=None):
     if input_path is None:
-        parser = argparse.ArgumentParser(
-            description="Run late-delivery inference."
-        )
+        parser = argparse.ArgumentParser(description="Run late-delivery inference.")
         parser.add_argument(
             "--input",
             required=True,

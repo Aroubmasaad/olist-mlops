@@ -12,6 +12,4 @@ def read_input(path):
     if input_path.suffix.lower() == ".csv":
         return pd.read_csv(input_path)
 
-    raise ValueError(
-        "Unsupported file type. Use .json or .csv"
-    )
+    raise ValueError("Unsupported file type. Use .json or .csv")

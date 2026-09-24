@@ -3,6 +3,15 @@ import time
 from src.logger import logger
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from fastapi.responses import Response
+
+from src.monitoring import (
+    REQUEST_COUNT,
+    ERROR_COUNT,
+    PREDICTION_COUNT,
+    PREDICTION_LATENCY,
+)
 
 from app.schemas import (
     OrderInput,
@@ -19,6 +28,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.warning(
@@ -32,11 +42,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         detail=exc.errors(),
     )
 
+
 @app.get("/health")
 def health():
-    return {
-        "status": "ok"
-    }
+    return {"status": "ok"}
+
+
+@app.get("/metrics")
+def metrics():
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
 
 
 @app.get("/model-info")
@@ -52,6 +69,7 @@ def model_info():
 @app.post("/predict", response_model=PredictionResponse)
 def predict_order(order: OrderInput):
     start_time = time.perf_counter()
+    REQUEST_COUNT.inc()
 
     logger.info(
         "Prediction request received | input=%s",
@@ -63,6 +81,7 @@ def predict_order(order: OrderInput):
     try:
         result = run_inference(df)
     except Exception:
+        ERROR_COUNT.inc()
         logger.exception("Prediction failed")
         raise HTTPException(
             status_code=500,
@@ -70,39 +89,46 @@ def predict_order(order: OrderInput):
         )
 
     latency = time.perf_counter() - start_time
+    PREDICTION_LATENCY.observe(latency)
+
+    prediction = result["prediction"][0]
+    probability = result["probability"][0]
+
+    PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
 
     logger.info(
         "Prediction completed | prediction=%s | probability=%.4f | "
         "model_version=%s | latency=%.4fs",
-        result["prediction"][0],
-        result["probability"][0],
+        prediction,
+        probability,
         result["model_version"],
         latency,
     )
 
     return {
-        "prediction": result["prediction"][0],
-        "probability": result["probability"][0],
+        "prediction": prediction,
+        "probability": probability,
         "model_version": result["model_version"],
     }
-    
+
+
 @app.post("/predict/batch", response_model=BatchPredictionResponse)
 def predict_batch(batch: BatchOrderInput):
     start_time = time.perf_counter()
+    REQUEST_COUNT.inc()
 
     logger.info(
-    "Batch prediction request received | number_of_orders=%s | input=%s",
-    len(batch.orders),
-    batch.model_dump(),
-)
-
-    df = pd.DataFrame(
-        [order.model_dump() for order in batch.orders]
+        "Batch prediction request received | number_of_orders=%s | input=%s",
+        len(batch.orders),
+        batch.model_dump(),
     )
+
+    df = pd.DataFrame([order.model_dump() for order in batch.orders])
 
     try:
         result = run_inference(df)
     except Exception:
+        ERROR_COUNT.inc()
         logger.exception("Batch prediction failed")
         raise HTTPException(
             status_code=500,
@@ -110,6 +136,23 @@ def predict_batch(batch: BatchOrderInput):
         )
 
     latency = time.perf_counter() - start_time
+    PREDICTION_LATENCY.observe(latency)
+
+    predictions = []
+
+    for prediction, probability in zip(
+        result["prediction"],
+        result["probability"],
+    ):
+        PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
+
+        predictions.append(
+            {
+                "prediction": prediction,
+                "probability": probability,
+                "model_version": result["model_version"],
+            }
+        )
 
     logger.info(
         "Batch prediction completed | predictions=%s | probabilities=%s | "
@@ -120,18 +163,4 @@ def predict_batch(batch: BatchOrderInput):
         latency,
     )
 
-    predictions = []
-
-    for prediction, probability in zip(
-        result["prediction"],
-        result["probability"],
-    ):
-        predictions.append({
-            "prediction": prediction,
-            "probability": probability,
-            "model_version": result["model_version"],
-        })
-
-    return {
-        "predictions": predictions
-    }
+    return {"predictions": predictions}

@@ -1,9 +1,10 @@
-
 from src.validation import validate_input
 from src.config import load_config
 from src.features import create_features
 from src.preprocessing import load_preprocessor, transform_features
 from src.model import load_model, predict
+
+
 def run_inference(df):
     config = load_config()
     df = validate_input(df)

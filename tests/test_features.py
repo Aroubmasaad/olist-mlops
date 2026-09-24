@@ -5,12 +5,14 @@ from src.features import RAW_FEATURES, create_features
 
 def test_create_features():
     # Skapar ett litet exempel med en order för att testa feature engineering.
-    df = pd.DataFrame({
-        "order_purchase_timestamp": ["2018-01-15 10:30:00"],
-        "order_estimated_delivery_date": ["2018-01-20 10:30:00"],
-        "customer_state": ["SP"],
-        "seller_state": ["SP"],
-    })
+    df = pd.DataFrame(
+        {
+            "order_purchase_timestamp": ["2018-01-15 10:30:00"],
+            "order_estimated_delivery_date": ["2018-01-20 10:30:00"],
+            "customer_state": ["SP"],
+            "seller_state": ["SP"],
+        }
+    )
 
     # Skapar nya features på samma sätt som i inference-pipelinen.
     result = create_features(df)

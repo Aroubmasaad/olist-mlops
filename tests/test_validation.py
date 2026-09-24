@@ -8,6 +8,7 @@ from src.validation import validate_input, validate_data_quality
 # 1. TEST AV SAKNAD OBLIGATORISK KOLUMN
 # ---------------------------------------------------------
 
+
 def test_missing_required_column_raises_error():
     """
     Testar att validate_input stoppar data om en obligatorisk
@@ -38,6 +39,7 @@ def test_missing_required_column_raises_error():
 # 2. HJÄLPFUNKTION SOM SKAPAR GILTIG TESTDATA
 # ---------------------------------------------------------
 
+
 def get_valid_input():
     """
     Skapar ett exempel på giltig inputdata.
@@ -49,25 +51,28 @@ def get_valid_input():
     valideringen upptäcker felet.
     """
 
-    return pd.DataFrame({
-        "order_purchase_timestamp": ["2018-01-10"],
-        "order_estimated_delivery_date": ["2018-01-20"],
-        "total_items": [2],
-        "total_price": [100],
-        "total_freight": [10],
-        "total_payment_value": [110],
-        "number_of_payments": [2],
-        "max_installments": [2],
-        "seller_count": [1],
-        "distance_km": [100],
-        "customer_state": ["SP"],
-        "seller_state": ["RJ"],
-    })
+    return pd.DataFrame(
+        {
+            "order_purchase_timestamp": ["2018-01-10"],
+            "order_estimated_delivery_date": ["2018-01-20"],
+            "total_items": [2],
+            "total_price": [100],
+            "total_freight": [10],
+            "total_payment_value": [110],
+            "number_of_payments": [2],
+            "max_installments": [2],
+            "seller_count": [1],
+            "distance_km": [100],
+            "customer_state": ["SP"],
+            "seller_state": ["RJ"],
+        }
+    )
 
 
 # ---------------------------------------------------------
 # 3. TEST AV NEGATIVT PRIS
 # ---------------------------------------------------------
+
 
 def test_negative_price_is_rejected():
     """
@@ -98,6 +103,7 @@ def test_negative_price_is_rejected():
 # 4. TEST AV FELAKTIG NUMERISK DATATYP
 # ---------------------------------------------------------
 
+
 def test_invalid_numeric_type_is_rejected():
     """
     Testar att numeriska kolumner verkligen innehåller
@@ -127,6 +133,7 @@ def test_invalid_numeric_type_is_rejected():
 # ---------------------------------------------------------
 # 5. TEST AV OGILTIG DELSTATSKOD
 # ---------------------------------------------------------
+
 
 def test_invalid_state_is_rejected():
     """
@@ -159,6 +166,7 @@ def test_invalid_state_is_rejected():
 # ---------------------------------------------------------
 # 6. TEST AV SAKNAT VÄRDE I OBLIGATORISKT FÄLT
 # ---------------------------------------------------------
+
 
 def test_missing_required_value_is_rejected():
     """
@@ -193,6 +201,7 @@ def test_missing_required_value_is_rejected():
 # 7. TEST AV FELAKTIG DATUMORDNING
 # ---------------------------------------------------------
 
+
 def test_invalid_delivery_date_is_rejected():
     """
     Testar den logiska ordningen mellan köpdatum och
@@ -215,10 +224,7 @@ def test_invalid_delivery_date_is_rejected():
     # Valideringen ska stoppa den logiskt felaktiga datan.
     with pytest.raises(
         ValueError,
-        match=(
-            "order_estimated_delivery_date must be "
-            "after order_purchase_timestamp"
-        ),
+        match=("order_estimated_delivery_date must be after order_purchase_timestamp"),
     ):
         validate_data_quality(df)
 
@@ -226,6 +232,7 @@ def test_invalid_delivery_date_is_rejected():
 # ---------------------------------------------------------
 # 8. TEST AV MISSING RATIO I EN BATCH
 # ---------------------------------------------------------
+
 
 def test_missing_ratio_in_required_column_is_rejected():
     """

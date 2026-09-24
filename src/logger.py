@@ -1,5 +1,6 @@
 import logging
 from src.config import PROJECT_ROOT
+
 LOG_DIR = PROJECT_ROOT / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
