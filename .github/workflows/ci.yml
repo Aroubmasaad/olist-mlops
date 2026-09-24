@@ -30,7 +30,9 @@ jobs:
         run: ruff format --check app src tests
 
       - name: Run tests
-        run: pytest -q
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q
 
       - name: Build Docker image
         run: docker build -t olist-mlops:latest .
